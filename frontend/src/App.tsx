@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { request } from "./api";
+import { ShortLinks } from "./shortener/ShortLinks";
 import { Dialog, ErrorNotice, Loading } from "./components";
 const sections = ["Overview", "My vault", "Shares", "Short links"] as const;
 export function App() {
@@ -52,23 +53,28 @@ export function App() {
           <h1>{section === "Overview" ? "Welcome to dVault" : section}</h1>
           <p>Keep your files organized and share them with confidence.</p>
         </section>
-        <section className="panel" aria-labelledby="status-title">
-          <h2 id="status-title">Workspace status</h2>
-          {health === "loading" ? (
-            <Loading>Connecting to your workspace…</Loading>
-          ) : health === "error" ? (
-            <ErrorNotice
-              message="We could not reach the server."
-              retry={() => void checkHealth()}
-            />
-          ) : (
-            <p className="connected">● Server connected</p>
-          )}
-          <p>
-            The workspace foundation is ready. Accounts, file storage, sharing
-            and short links will become available as their modules are released.
-          </p>
-        </section>
+        {section === "Short links" ? (
+          <ShortLinks />
+        ) : (
+          <section className="panel" aria-labelledby="status-title">
+            <h2 id="status-title">Workspace status</h2>
+            {health === "loading" ? (
+              <Loading>Connecting to your workspace…</Loading>
+            ) : health === "error" ? (
+              <ErrorNotice
+                message="We could not reach the server."
+                retry={() => void checkHealth()}
+              />
+            ) : (
+              <p className="connected">● Server connected</p>
+            )}
+            <p>
+              The workspace foundation is ready. Accounts, file storage, sharing
+              and short links will become available as their modules are
+              released.
+            </p>
+          </section>
+        )}
         <footer>Private by design. Built one step at a time.</footer>
       </main>
       <Dialog open={about} title="About dVault" onClose={() => setAbout(false)}>

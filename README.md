@@ -74,6 +74,26 @@ erDiagram
 
 Deleting a user cascades to its role assignments; deleting a referenced role is restricted. Future file/share foreign-key behavior remains to be agreed before those migrations.
 
+## Short link management
+
+The **Short links** navigation item provides an account-scoped create/list/detail/edit/delete screen with generated/custom aliases, expiration and active settings, pagination, validation, error/empty/loading states, and deletion confirmation. A signed-out session sees a sign-in notice; account forms remain in the account UI module. Public redirects and click analytics are not implemented in this slice, so reserved `/u/{alias}` paths are displayed as text rather than working redirect links.
+
+All `/api/urls` operations require a session, and mutations require CSRF. The owner comes exclusively from the authenticated principal. Another account receives 404 for detail/update/delete and cannot see the resource in its list. Request bodies cannot select an owner.
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| POST | `/api/urls` | 201 with resource DTO and Location pointing to its detail endpoint |
+| GET | `/api/urls?page=0&size=10` | 200 `{content,page,size,totalElements,totalPages}`, newest ID first; maximum size 100 |
+| GET | `/api/urls/{id}` | 200 owner resource DTO, otherwise 404 |
+| PUT | `/api/urls/{id}` | 200 updated resource DTO; full replacement of destination/expiry/active settings |
+| DELETE | `/api/urls/{id}` | 204 after owner-scoped deletion |
+
+Create/update JSON: `{targetUrl,alias?,expiresAt?,active?}`. Response: `{id,alias,targetUrl,expiresAt,active}`. Only HTTP(S) destinations with a valid host are accepted; credentials, literal control characters, backslashes, malformed URLs and invalid ports are rejected. Destinations are parsed locally and never fetched by the server.
+
+Aliases are stripped/lowercased and must match `[a-z0-9][a-z0-9_-]{2,31}`. A blank create alias generates 12 hexadecimal characters using SecureRandom, retrying occupied candidates up to eight times. Aliases are globally unique in PostgreSQL; collisions, including insert/update races, return 409. A blank update alias preserves the existing alias. Expiration is optional/null or a future UTC ISO-8601 instant; the screen converts local datetime input to UTC. `active` defaults to true when omitted. Validation errors return 400, anonymous requests 401, CSRF failures 403, and concealed missing/non-owned resources 404.
+
+`V002__short_urls.sql` adds a many-to-one owner relation to users and an owner/id listing index. Deleting an account cascades its short URL metadata; no object storage is involved. V002 follows the integrated V001 and must retain the next available migration version at merge review. No analytics persistence or redirect behavior is claimed.
+
 ## Analytics event agreement for implementation
 
 Alok publishes typed click/download events; Rana owns persistence/listeners. Each event carries a UUID `eventId`, UTC `occurredAt`, `ownerId` and `linkId`; downloads also carry `fileId`. No token, code, password or target URL belongs in an event. Publishers emit within their domain transaction, and analytics listeners process only after successful commit in their own transaction. Analytics persistence must enforce unique event IDs for idempotency; a failed listener must not turn a completed redirect/download into a reported failure. The analytics module must document and test recovery of failed event persistence before release. Clicks count accepted redirects; download counts represent atomically reserved authorized attempts, including failed streams. Sharing owns reservation enforcement; analytics never authorizes access. These are proposed integration contracts for peer review, not claims of implemented analytics.
