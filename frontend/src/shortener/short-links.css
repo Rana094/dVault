@@ -1,0 +1,55 @@
+.short-links {
+  display: grid;
+  gap: 24px;
+}
+.short-links .panel {
+  max-width: none;
+}
+.url-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.url-active {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 20px 0;
+}
+.url-list {
+  list-style: none;
+  padding: 0;
+}
+.url-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid #d9e3de;
+}
+.url-list a,
+.url-list small {
+  display: block;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.url-list a {
+  color: #21644b;
+}
+.url-list li > div:first-child {
+  min-width: 0;
+}
+.url-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+@media (max-width: 680px) {
+  .url-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
