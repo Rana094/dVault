@@ -1,0 +1,36 @@
+# Private development instructions
+/.planning/
+/AGENTS.md
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Java and Maven
+target/
+*.class
+*.log
+
+# React and Node.js
+node_modules/
+dist/
+coverage/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local storage
+/uploads/
+/storage/
+
+# Operating system
+.DS_Store
+Thumbs.db
